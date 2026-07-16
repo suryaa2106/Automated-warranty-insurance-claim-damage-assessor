@@ -24,6 +24,7 @@ import policy_agent
 import decision_agent
 import explanation_agent
 import vehicle_db
+import color_agent
 
 logger = logging.getLogger("orchestrator")
 
@@ -78,9 +79,16 @@ async def process_claim(
     # 2. Fraud — is this photo trustworthy?
     fraud_result = await fraud_agent.assess_fraud(image_bytes)
 
-    # 2b. Fetch vehicle price tier for cost scaling
+    # 2b. Fetch vehicle record for price tier + registered color
     vehicle_record = vehicle_db.get_vehicle(vehicle_reg_number)
-    price_tier = vehicle_record.get("price_tier", "Low") if vehicle_record else "Low"
+    price_tier        = vehicle_record.get("price_tier", "Low")  if vehicle_record else "Low"
+    registered_color  = vehicle_record.get("color", "")           if vehicle_record else ""
+
+    # 2c. Color verification — does the photo match the registered car color?
+    if registered_color:
+        color_result = await color_agent.verify_color(image_bytes, registered_color, mime_type)
+    else:
+        color_result = None
 
     # 3. Cost — what will it cost to repair? (scaled by vehicle price tier)
     cost_result = cost_agent.estimate_cost(vision_result.get("damaged_parts", []), price_tier=price_tier)
@@ -88,8 +96,8 @@ async def process_claim(
     # 4. Policy — what does the customer's policy actually cover?
     policy_result = policy_agent.validate_policy(policy_id, cost_result["line_items"], cost_result["subtotal"])
 
-    # 5. Decision — approve / reject / flag
-    decision_result = decision_agent.decide(fraud_result, cost_result, policy_result)
+    # 5. Decision — approve / reject / flag (includes color mismatch logic)
+    decision_result = decision_agent.decide(fraud_result, cost_result, policy_result, color_result=color_result)
 
     # 6. Explanation — human-readable summary
     summary_text = await explanation_agent.generate_explanation(
@@ -97,18 +105,19 @@ async def process_claim(
     )
 
     record = {
-        "claim_id": claim_id,
-        "submitted_at": submitted_at,
-        "user_name": user_name,
+        "claim_id":           claim_id,
+        "submitted_at":       submitted_at,
+        "user_name":          user_name,
         "vehicle_reg_number": vehicle_reg_number,
-        "insurance_type": insurance_type,
-        "policy_id": policy_id,
-        "vision_result": vision_result,
-        "fraud_result": fraud_result,
-        "cost_result": cost_result,
-        "policy_result": policy_result,
-        "decision_result": decision_result,
-        "summary_text": summary_text,
+        "insurance_type":     insurance_type,
+        "policy_id":          policy_id,
+        "vision_result":      vision_result,
+        "fraud_result":       fraud_result,
+        "color_result":       color_result,
+        "cost_result":        cost_result,
+        "policy_result":      policy_result,
+        "decision_result":    decision_result,
+        "summary_text":       summary_text,
     }
 
     await _persist_claim(record)

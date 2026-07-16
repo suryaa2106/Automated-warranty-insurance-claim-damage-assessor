@@ -7,7 +7,7 @@
   <meta name="description" content="Submit vehicle damage claims instantly with ClaimSnap's AI-powered multi-agent assessment system. Fast, accurate, and fraud-resistant." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -19,81 +19,176 @@
     <div class="orb orb-3"></div>
   </div>
 
-  <!-- ===================== LOGIN SCREEN ===================== -->
-  <section id="login-screen" class="screen screen-centered">
+  <!-- ===================== SCREEN 1: HOME / PORTAL SELECTION ===================== -->
+  <section id="home-screen" class="screen screen-centered">
+    <div class="home-wrapper">
+      <div class="home-hero">
+        <div class="brand brand-large">
+          <div class="brand-icon brand-icon-lg">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3L14.5 4Z"/>
+              <circle cx="12" cy="13" r="3"/>
+            </svg>
+          </div>
+          <span class="brand-name brand-name-lg">ClaimSnap</span>
+          <span class="brand-badge">AI</span>
+        </div>
+        <h1 class="home-title">Intelligent Damage Assessment<br/><span class="home-title-accent">Powered by Multi-Agent AI</span></h1>
+        <p class="home-subtitle">Instant fraud detection · Vehicle color verification · Tier-based pricing · Real-time decisions</p>
+      </div>
+
+      <div class="portal-cards">
+
+        <!-- Customer Card -->
+        <button id="go-customer" class="portal-card portal-card-customer" onclick="showScreen('customer-login-screen')">
+          <div class="portal-card-icon portal-card-icon-blue">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          </div>
+          <div class="portal-card-body">
+            <h2 class="portal-card-title">I'm a Customer</h2>
+            <p class="portal-card-desc">File a damage claim, upload your photo, and get an instant AI-powered assessment and payout estimate.</p>
+          </div>
+          <div class="portal-card-features">
+            <span class="feature-chip"><span class="feature-dot green"></span>Instant Assessment</span>
+            <span class="feature-chip"><span class="feature-dot blue"></span>Fraud Detection</span>
+            <span class="feature-chip"><span class="feature-dot purple"></span>Color Verification</span>
+          </div>
+          <div class="portal-card-arrow">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </button>
+
+        <!-- Insurer Card -->
+        <button id="go-insurer" class="portal-card portal-card-insurer" onclick="showScreen('insurer-screen')">
+          <div class="portal-card-icon portal-card-icon-purple">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/>
+            </svg>
+          </div>
+          <div class="portal-card-body">
+            <h2 class="portal-card-title">I'm an Insurer</h2>
+            <p class="portal-card-desc">Register new customers and vehicles. AI will auto-classify the price tier and link their policy instantly.</p>
+          </div>
+          <div class="portal-card-features">
+            <span class="feature-chip"><span class="feature-dot purple"></span>Vehicle Registration</span>
+            <span class="feature-chip"><span class="feature-dot amber"></span>AI Tier Classifier</span>
+            <span class="feature-chip"><span class="feature-dot green"></span>Policy Linking</span>
+          </div>
+          <div class="portal-card-arrow">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </button>
+
+      </div>
+
+      <div class="home-stats">
+        <div class="home-stat"><span class="home-stat-num">6</span><span class="home-stat-label">AI Agents</span></div>
+        <div class="home-stat-divider"></div>
+        <div class="home-stat"><span class="home-stat-num">3</span><span class="home-stat-label">Price Tiers</span></div>
+        <div class="home-stat-divider"></div>
+        <div class="home-stat"><span class="home-stat-num">100%</span><span class="home-stat-label">Automated</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SCREEN 2: CUSTOMER LOGIN ===================== -->
+  <section id="customer-login-screen" class="screen screen-centered hidden">
     <div class="glass-card login-card">
 
-      <div class="brand">
+      <button class="back-btn" onclick="showScreen('home-screen')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Back
+      </button>
+
+      <div class="brand" style="margin-top:8px;">
         <div class="brand-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3L14.5 4Z"/>
-            <circle cx="12" cy="13" r="3"/>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
           </svg>
         </div>
-        <span class="brand-name">ClaimSnap</span>
-        <span class="brand-badge">AI</span>
+        <span class="brand-name">Customer Login</span>
+        <span class="brand-badge">Secure</span>
       </div>
 
-      <!-- Tab Toggle -->
-      <div class="portal-toggle">
-        <button id="tab-customer" class="portal-tab portal-tab-active" onclick="switchTab('customer')">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          Customer
-        </button>
-        <button id="tab-insurer" class="portal-tab" onclick="switchTab('insurer')">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>
-          Insurer Portal
-        </button>
+      <div class="login-hero">
+        <h1 class="login-title">File Your Claim</h1>
+        <p class="login-subtitle">Enter your vehicle registration number and customer number provided by your insurer.</p>
       </div>
 
-      <!-- ── CUSTOMER LOGIN ── -->
-      <div id="customer-panel">
-        <div class="login-hero">
-          <h1 class="login-title">File Your Claim Instantly</h1>
-          <p class="login-subtitle">Enter your vehicle registration and customer number to continue.</p>
+      <form id="login-form" class="form-stack" novalidate>
+        <div class="form-group">
+          <label class="form-label" for="input-vehicle-reg">Vehicle Registration Number</label>
+          <div class="input-wrap">
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 3v4h-7V8Z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            <input required id="input-vehicle-reg" type="text" placeholder="e.g. ABC-1234" class="form-input" autocomplete="off" />
+          </div>
         </div>
 
-        <form id="login-form" class="form-stack" novalidate>
-          <div class="form-group">
-            <label class="form-label" for="input-vehicle-reg">Vehicle Registration No.</label>
-            <div class="input-wrap">
-              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 3v4h-7V8Z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-              <input required id="input-vehicle-reg" type="text" placeholder="e.g. ABC-1234" class="form-input" autocomplete="off" />
-            </div>
+        <div class="form-group">
+          <label class="form-label" for="input-customer-number">Customer Number</label>
+          <div class="input-wrap">
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <input required id="input-customer-number" type="text" placeholder="e.g. CUST-001" class="form-input" autocomplete="off" />
           </div>
+        </div>
 
-          <div class="form-group">
-            <label class="form-label" for="input-customer-number">Customer Number</label>
-            <div class="input-wrap">
-              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-              <input required id="input-customer-number" type="text" placeholder="e.g. CUST-001" class="form-input" autocomplete="off" />
-            </div>
-          </div>
+        <div id="login-error" class="alert-error hidden"></div>
 
-          <div id="login-error" class="alert-error hidden"></div>
+        <button type="submit" id="btn-login" class="btn btn-primary btn-full">
+          <span id="btn-login-text">Continue to Dashboard</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </form>
 
-          <button type="submit" id="btn-login" class="btn btn-primary btn-full">
-            <span id="btn-login-text">Continue to Dashboard</span>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      <div class="login-hint">
+        <p>Demo: <code>ABC-1234</code> / <code>CUST-001</code> &nbsp;·&nbsp; <code>XYZ-5678</code> / <code>CUST-002</code></p>
+      </div>
+
+      <div class="login-features">
+        <div class="feature-pill"><span class="feature-dot green"></span> Vision AI</div>
+        <div class="feature-pill"><span class="feature-dot blue"></span> Color Verification</div>
+        <div class="feature-pill"><span class="feature-dot purple"></span> Fraud Detection</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SCREEN 3: INSURER PORTAL ===================== -->
+  <section id="insurer-screen" class="screen hidden">
+
+    <nav class="navbar">
+      <div class="navbar-inner">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <button class="back-btn back-btn-nav" onclick="showScreen('home-screen')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
           </button>
-        </form>
-
-        <div class="login-hint">
-          <p>Demo credentials: <code>ABC-1234</code> / <code>CUST-001</code></p>
-        </div>
-
-        <div class="login-features">
-          <div class="feature-pill"><span class="feature-dot green"></span> Vision AI</div>
-          <div class="feature-pill"><span class="feature-dot blue"></span> Fraud Detection</div>
-          <div class="feature-pill"><span class="feature-dot purple"></span> Tier Pricing</div>
+          <div class="brand">
+            <div class="brand-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/>
+              </svg>
+            </div>
+            <span class="brand-name">Insurer Portal</span>
+            <span class="brand-badge">Admin</span>
+          </div>
         </div>
       </div>
+    </nav>
 
-      <!-- ── INSURER PORTAL ── -->
-      <div id="insurer-panel" class="hidden">
-        <div class="login-hero">
-          <h1 class="login-title">Insurer Portal</h1>
-          <p class="login-subtitle">Register a new customer vehicle. AI will auto-classify the price tier.</p>
+    <main class="dashboard-main">
+
+      <!-- Registration Card -->
+      <div class="glass-card">
+        <div class="card-header">
+          <div class="card-icon card-icon-purple">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+          </div>
+          <div>
+            <h2 class="card-title">Register New Vehicle</h2>
+            <p class="card-subtitle">AI will auto-classify price tier based on make, model & year</p>
+          </div>
         </div>
 
         <form id="insurer-form" class="form-stack" novalidate>
@@ -114,11 +209,20 @@
             </div>
           </div>
 
-          <div class="form-group">
-            <label class="form-label" for="ins-vehicle-reg">Vehicle Registration No.</label>
-            <div class="input-wrap">
-              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 3v4h-7V8Z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-              <input required id="ins-vehicle-reg" type="text" placeholder="e.g. KA-05-MJ-7890" class="form-input" />
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="ins-vehicle-reg">Registration Number</label>
+              <div class="input-wrap">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 3v4h-7V8Z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                <input required id="ins-vehicle-reg" type="text" placeholder="e.g. KA-05-MJ-7890" class="form-input" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="ins-color">Vehicle Color</label>
+              <div class="input-wrap">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
+                <input required id="ins-color" type="text" placeholder="e.g. White, Black, Silver" class="form-input" />
+              </div>
             </div>
           </div>
 
@@ -126,7 +230,7 @@
             <div class="form-group">
               <label class="form-label" for="ins-make">Make</label>
               <div class="input-wrap">
-                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85m19.5 1.9c-3.5-.93-6.63-.82-8.94 0-2.58.92-5.01 2.86-7.44 6.32"/></svg>
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>
                 <input required id="ins-make" type="text" placeholder="e.g. Toyota" class="form-input" />
               </div>
             </div>
@@ -170,16 +274,33 @@
           <div id="insurer-success" class="alert-success hidden"></div>
 
           <button type="submit" id="btn-insurer-register" class="btn btn-primary btn-full">
-            <span id="btn-insurer-text">Register & Classify Vehicle</span>
+            <span id="btn-insurer-text">Register &amp; Classify Vehicle</span>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5Z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
           </button>
         </form>
       </div>
 
-    </div>
+      <!-- Registered Vehicles Card -->
+      <div class="glass-card">
+        <div class="card-header" style="margin-bottom:16px;">
+          <div class="card-icon card-icon-blue">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 3v4h-7V8Z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          </div>
+          <div>
+            <h2 class="card-title">Registered Vehicles</h2>
+            <p class="card-subtitle">All vehicles currently in the database</p>
+          </div>
+          <button class="btn btn-ghost" id="btn-refresh-vehicles" onclick="loadVehicles()" style="margin-left:auto;padding:7px 14px;font-size:12px;">Refresh</button>
+        </div>
+        <div id="vehicle-list" class="vehicle-list">
+          <p class="vehicle-list-empty">Loading vehicles...</p>
+        </div>
+      </div>
+
+    </main>
   </section>
 
-  <!-- ===================== DASHBOARD ===================== -->
+  <!-- ===================== SCREEN 4: CUSTOMER DASHBOARD ===================== -->
   <section id="dashboard-screen" class="screen hidden">
 
     <nav class="navbar">
@@ -214,7 +335,7 @@
           </div>
           <div>
             <h2 class="card-title">Submit New Claim</h2>
-            <p class="card-subtitle">Capture live vehicle damage for AI assessment</p>
+            <p class="card-subtitle">Capture live vehicle damage · Color will be auto-verified</p>
           </div>
         </div>
 
@@ -229,7 +350,7 @@
             </svg>
           </div>
           <p class="capture-label">Tap to open camera</p>
-          <p class="capture-sublabel">Live capture only &middot; No gallery access</p>
+          <p class="capture-sublabel">Ensure your full vehicle is visible for color verification</p>
         </div>
 
         <canvas id="preprocess-canvas" class="hidden"></canvas>
@@ -258,9 +379,7 @@
       <!-- Processing Card -->
       <div id="processing-card" class="glass-card hidden">
         <div class="processing-state">
-          <div class="processing-ring">
-            <div class="ring-inner"></div>
-          </div>
+          <div class="processing-ring"><div class="ring-inner"></div></div>
           <h3 class="processing-title">Analysing Your Claim</h3>
           <p class="processing-subtitle">Multi-agent AI pipeline running&hellip;</p>
           <div class="pipeline-steps">
@@ -309,6 +428,9 @@
             <p id="stat-payout" class="stat-value stat-value-blue"></p>
           </div>
         </div>
+
+        <!-- Color Verification Result -->
+        <div id="color-result-box" class="color-result-box hidden"></div>
 
         <div class="section-label">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>

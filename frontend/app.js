@@ -1,15 +1,33 @@
 // app.js
 // ---------------------------------------------------------------
-// Handles: Customer/Insurer tab toggle, DB-validated customer login,
-// insurer vehicle registration, forced-camera capture, HTML5 Canvas
-// pre-processing, claim submission, pipeline step animation, result rendering.
+// Handles navigation, database-validated customer login,
+// insurer vehicle registration with color and auto-tier classification,
+// camera capture/preprocessing, and claim submission.
 // ---------------------------------------------------------------
 
 const API_BASE_URL = window.CLAIM_API_BASE_URL || "http://localhost:8000";
 
+// ----- Navigation -----
+function showScreen(screenId) {
+  const screens = ["home-screen", "customer-login-screen", "insurer-screen", "dashboard-screen"];
+  screens.forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) {
+      if (id === screenId) {
+        el.classList.remove("hidden");
+      } else {
+        el.classList.add("hidden");
+      }
+    }
+  });
+
+  // If entering insurer screen, reload the vehicle list
+  if (screenId === "insurer-screen") {
+    loadVehicles();
+  }
+}
+
 // ----- Element refs -----
-const loginScreen      = document.getElementById("login-screen");
-const dashboardScreen  = document.getElementById("dashboard-screen");
 const loginForm        = document.getElementById("login-form");
 const insurerForm      = document.getElementById("insurer-form");
 
@@ -39,26 +57,6 @@ const PIPELINE_STEPS = ["step-vision","step-fraud","step-cost","step-policy","st
 let session = null;           // full session object from API
 let processedImageBlob = null;
 let pipelineTimer = null;
-
-// ===================== TAB TOGGLE =====================
-function switchTab(tab) {
-  const customerPanel = document.getElementById("customer-panel");
-  const insurerPanel  = document.getElementById("insurer-panel");
-  const tabCustomer   = document.getElementById("tab-customer");
-  const tabInsurer    = document.getElementById("tab-insurer");
-
-  if (tab === "customer") {
-    customerPanel.classList.remove("hidden");
-    insurerPanel.classList.add("hidden");
-    tabCustomer.classList.add("portal-tab-active");
-    tabInsurer.classList.remove("portal-tab-active");
-  } else {
-    insurerPanel.classList.remove("hidden");
-    customerPanel.classList.add("hidden");
-    tabInsurer.classList.add("portal-tab-active");
-    tabCustomer.classList.remove("portal-tab-active");
-  }
-}
 
 // ===================== CUSTOMER LOGIN =====================
 loginForm.addEventListener("submit", async (event) => {
@@ -99,12 +97,12 @@ loginForm.addEventListener("submit", async (event) => {
       make:          data.make,
       model:         data.model,
       year:          data.year,
+      color:         data.color,
       priceTier:     data.price_tier,
     };
 
     populateDashboard();
-    loginScreen.classList.add("hidden");
-    dashboardScreen.classList.remove("hidden");
+    showScreen("dashboard-screen");
 
   } catch (err) {
     showFormError(loginError, err.message || "Login failed. Please try again.");
@@ -116,13 +114,14 @@ loginForm.addEventListener("submit", async (event) => {
 
 function populateDashboard() {
   displayUserName.textContent   = session.customerName;
-  displayVehicleReg.textContent = `${session.make} ${session.model} ${session.year} · ${session.vehicleReg}`;
+  displayVehicleReg.textContent = `${session.make} ${session.model} ${session.year} · ${session.vehicleReg} (${session.color || "No color specified"})`;
   displayAvatar.textContent     = session.customerName.charAt(0).toUpperCase();
 
   // Tier badge
   const tierColors = { Low: "tier-low", Mid: "tier-mid", High: "tier-high" };
   displayTierBadge.textContent  = `${session.priceTier} Tier`;
   displayTierBadge.className    = `tier-badge ${tierColors[session.priceTier] || "tier-mid"}`;
+  displayTierBadge.classList.remove("hidden");
 }
 
 // ===================== INSURER REGISTRATION =====================
@@ -142,6 +141,7 @@ insurerForm.addEventListener("submit", async (event) => {
     customer_name:       document.getElementById("ins-customer-name").value.trim(),
     customer_number:     document.getElementById("ins-customer-number").value.trim().toUpperCase(),
     vehicle_reg_number:  document.getElementById("ins-vehicle-reg").value.trim(),
+    color:               document.getElementById("ins-color").value.trim(),
     make:                document.getElementById("ins-make").value.trim(),
     model:               document.getElementById("ins-model").value.trim(),
     year:                parseInt(document.getElementById("ins-year").value, 10),
@@ -166,10 +166,11 @@ insurerForm.addEventListener("submit", async (event) => {
 
     showFormSuccess(
       insurerSuccess,
-      `✓ ${data.customer_name} registered! ${data.make} ${data.model} ${data.year} classified as ${tierEmoji} ${data.price_tier} Tier. Reg: ${data.vehicle_reg_number}`
+      `✓ Registered! Classified as ${tierEmoji} ${data.price_tier} Tier. Reg: ${data.vehicle_reg_number}`
     );
 
     insurerForm.reset();
+    loadVehicles(); // refresh vehicle list
   } catch (err) {
     showFormError(insurerError, err.message);
   } finally {
@@ -177,6 +178,45 @@ insurerForm.addEventListener("submit", async (event) => {
     document.getElementById("btn-insurer-register").disabled = false;
   }
 });
+
+// ===================== VEHICLE LIST FOR INSURER =====================
+async function loadVehicles() {
+  const container = document.getElementById("vehicle-list");
+  if (!container) return;
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/insurer/vehicles`);
+    if (!response.ok) throw new Error("Failed to fetch vehicles.");
+    const data = await response.json();
+
+    container.innerHTML = "";
+    if (data.vehicles.length === 0) {
+      container.innerHTML = `<p class="vehicle-list-empty">No vehicles registered yet.</p>`;
+      return;
+    }
+
+    data.vehicles.forEach((v) => {
+      const item = document.createElement("div");
+      item.className = "vehicle-list-item";
+      
+      const tierClass = { Low: "tier-low", Mid: "tier-mid", High: "tier-high" }[v.price_tier] || "tier-mid";
+
+      item.innerHTML = `
+        <div class="vehicle-list-info">
+          <div class="vehicle-list-main">${v.year} ${v.make} ${v.model} <span class="vehicle-list-color">${v.color || 'No Color'}</span></div>
+          <div class="vehicle-list-sub">Reg: <strong>${v.vehicle_reg_number}</strong> &bull; Cust: ${v.customer_name} (${v.customer_number})</div>
+        </div>
+        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
+          <span class="tier-badge ${tierClass}">${v.price_tier}</span>
+          <span class="vehicle-list-policy">${v.policy_id}</span>
+        </div>
+      `;
+      container.appendChild(item);
+    });
+  } catch (err) {
+    container.innerHTML = `<p class="vehicle-list-error">Error loading vehicles: ${err.message}</p>`;
+  }
+}
 
 // ===================== CAMERA CAPTURE =====================
 captureZone.addEventListener("click", () => cameraInput.click());
@@ -237,12 +277,15 @@ function startPipelineAnimation() {
 
   pipelineTimer = setInterval(() => {
     const currentEl = document.getElementById(PIPELINE_STEPS[current]);
-    currentEl.classList.remove("active");
-    currentEl.classList.add("done");
+    if (currentEl) {
+      currentEl.classList.remove("active");
+      currentEl.classList.add("done");
+    }
 
     current++;
     if (current < PIPELINE_STEPS.length) {
-      document.getElementById(PIPELINE_STEPS[current]).classList.add("active");
+      const nextEl = document.getElementById(PIPELINE_STEPS[current]);
+      if (nextEl) nextEl.classList.add("active");
     } else {
       clearInterval(pipelineTimer);
     }
@@ -253,8 +296,10 @@ function stopPipelineAnimation() {
   if (pipelineTimer) { clearInterval(pipelineTimer); pipelineTimer = null; }
   PIPELINE_STEPS.forEach((id) => {
     const el = document.getElementById(id);
-    el.classList.remove("active");
-    el.classList.add("done");
+    if (el) {
+      el.classList.remove("active");
+      el.classList.add("done");
+    }
   });
 }
 
@@ -329,6 +374,32 @@ function renderResult(result) {
   document.getElementById("stat-subtotal").textContent = `$${result.cost_result.subtotal}${tierLabel}`;
   document.getElementById("stat-payout").textContent   = `$${result.policy_result.final_payout_estimate}`;
 
+  // Color verification box display
+  const colorBox = document.getElementById("color-result-box");
+  const colRes = result.color_result;
+  if (colorBox) {
+    if (colRes) {
+      colorBox.classList.remove("hidden");
+      const matchText = colRes.match 
+        ? `<span style="color:var(--green)">✓ MATCHED</span>` 
+        : `<span style="color:var(--red); font-weight:700;">✗ MISMATCH</span>`;
+      
+      const badgeClass = colRes.match ? "alert-success" : (colRes.confidence === "high" ? "alert-error" : "alert-warning");
+      
+      colorBox.className = `color-result-box ${badgeClass}`;
+      colorBox.innerHTML = `
+        <div style="font-weight:600; margin-bottom: 4px;">Car Color Verification: ${matchText}</div>
+        <div style="font-size:12.5px; color:var(--text-muted);">
+          Registered: <strong>${colRes.registered_color}</strong> &bull; 
+          AI Detected: <strong>${colRes.detected_color}</strong> (Confidence: ${colRes.confidence})
+        </div>
+        ${colRes.notes ? `<div style="font-size:11.5px; margin-top:4px; opacity:0.85;">${colRes.notes}</div>` : ''}
+      `;
+    } else {
+      colorBox.classList.add("hidden");
+    }
+  }
+
   // Damage list
   const damageList = document.getElementById("damage-list");
   damageList.innerHTML = "";
@@ -349,10 +420,19 @@ function renderResult(result) {
   // Fraud summary
   const fraudEl = document.getElementById("fraud-summary");
   const fraud   = result.fraud_result;
-  fraudEl.textContent = fraud.fraud_flag
-    ? `⚠ Fraud flag raised: ${fraud.exif_check?.reason || ""} ${fraud.duplicate_check?.is_duplicate ? "Duplicate image detected." : ""}`.trim()
-    : "✓ No fraud signals detected. EXIF metadata and duplicate-image checks passed.";
-  fraudEl.style.color = fraud.fraud_flag ? "var(--amber)" : "var(--text-muted)";
+  let fraudMessage = "";
+  if (fraud.fraud_flag) {
+    fraudMessage = `⚠ Fraud flag raised: ${fraud.exif_check?.reason || ""} ${fraud.duplicate_check?.is_duplicate ? "Duplicate image detected." : ""}`.trim();
+  } else {
+    fraudMessage = "✓ No fraud signals detected. EXIF metadata and duplicate-image checks passed.";
+  }
+  
+  if (colRes && !colRes.match) {
+    fraudMessage += `\n⚠ Vehicle Color Mismatch: registered color is '${colRes.registered_color}', but the image shows '${colRes.detected_color}'.`;
+  }
+
+  fraudEl.textContent = fraudMessage;
+  fraudEl.style.color = (fraud.fraud_flag || (colRes && !colRes.match)) ? "var(--amber)" : "var(--text-muted)";
 }
 
 // ===================== RESET =====================

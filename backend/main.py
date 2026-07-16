@@ -101,6 +101,7 @@ class RegisterVehicleRequest(BaseModel):
     make: str
     model: str
     year: int
+    color: str
     policy_id: str
     insurance_type: str
 
@@ -197,6 +198,7 @@ async def insurer_register(req: RegisterVehicleRequest):
         "make": req.make,
         "model": req.model,
         "year": req.year,
+        "color": req.color.strip().capitalize(),
         "price_tier": price_tier,
         "policy_id": req.policy_id,
         "insurance_type": req.insurance_type,
