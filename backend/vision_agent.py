@@ -17,11 +17,13 @@ Design notes:
 import os
 import json
 import logging
+import base64
+import httpx
 from typing import Any, Dict
 
 logger = logging.getLogger("vision_agent")
 
-MODEL_NAME = "gemini-2.0-flash"
+MODEL_NAME = "meta-llama/llama-4-scout-17b-16e-instruct"
 
 VISION_PROMPT = """You are an expert vehicle damage inspector for an insurance company.
 Analyze the attached photo of a vehicle and identify EVERY visible damaged part.
@@ -85,35 +87,48 @@ def _strip_code_fences(text: str) -> str:
 
 async def analyze_damage(image_bytes: bytes, mime_type: str = "image/jpeg") -> Dict[str, Any]:
     """
-    Sends the image + prompt to Gemini and returns the parsed damage JSON.
+    Sends the image + prompt to Groq and returns the parsed damage JSON.
     Falls back to a mock structure on any failure so the pipeline never
     hard-crashes during a live demo.
     """
-    api_key = os.getenv("GEMINI_API_KEY")
+    api_key = os.getenv("GROQ_API_KEY")
     if not api_key:
-        logger.warning("GEMINI_API_KEY not set — using mock vision response.")
+        logger.warning("GROQ_API_KEY not set — using mock vision response.")
         return _mock_response()
 
     try:
-        from google import genai
-        from google.genai import types
-
-        client = genai.Client(api_key=api_key)
-
-        response = client.models.generate_content(
-            model=MODEL_NAME,
-            contents=[
-                types.Part.from_bytes(data=image_bytes, mime_type=mime_type),
-                VISION_PROMPT,
+        base64_image = base64.b64encode(image_bytes).decode("utf-8")
+        payload = {
+            "model": MODEL_NAME,
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": VISION_PROMPT},
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:{mime_type};base64,{base64_image}"
+                            }
+                        }
+                    ]
+                }
             ],
-            config=types.GenerateContentConfig(
-                response_mime_type="application/json",
-                response_schema=RESPONSE_SCHEMA,
-                temperature=0.1,
-            ),
-        )
+            "response_format": {"type": "json_object"},
+            "temperature": 0.1
+        }
 
-        raw_text = response.text
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
+        }
+
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.post("https://api.groq.com/openai/v1/chat/completions", json=payload, headers=headers)
+            response.raise_for_status()
+            result = response.json()
+            raw_text = result["choices"][0]["message"]["content"]
+
         cleaned = _strip_code_fences(raw_text)
         parsed = json.loads(cleaned)
 

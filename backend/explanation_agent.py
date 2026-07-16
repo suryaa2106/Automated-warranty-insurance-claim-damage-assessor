@@ -12,11 +12,12 @@ missing or the call fails, so the pipeline always returns a usable summary.
 
 import os
 import logging
+import httpx
 from typing import Any, Dict
 
 logger = logging.getLogger("explanation_agent")
 
-MODEL_NAME = "gemini-2.0-flash"
+MODEL_NAME = "llama-3.3-70b-versatile"
 
 
 def _template_summary(vision_result: Dict, cost_result: Dict, policy_result: Dict, decision_result: Dict) -> str:
@@ -52,9 +53,9 @@ async def generate_explanation(
     policy_result: Dict[str, Any],
     decision_result: Dict[str, Any],
 ) -> str:
-    api_key = os.getenv("GEMINI_API_KEY")
+    api_key = os.getenv("GROQ_API_KEY")
     if not api_key:
-        logger.warning("GEMINI_API_KEY not set — using template explanation.")
+        logger.warning("GROQ_API_KEY not set — using template explanation.")
         return _template_summary(vision_result, cost_result, policy_result, decision_result)
 
     prompt = f"""You are a claims support assistant writing directly to a customer.
@@ -73,11 +74,28 @@ Data:
 Write only the paragraph, addressed to the customer."""
 
     try:
-        from google import genai
+        payload = {
+            "model": MODEL_NAME,
+            "messages": [
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            "temperature": 0.3
+        }
 
-        client = genai.Client(api_key=api_key)
-        response = client.models.generate_content(model=MODEL_NAME, contents=prompt)
-        text = response.text.strip()
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
+        }
+
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.post("https://api.groq.com/openai/v1/chat/completions", json=payload, headers=headers)
+            response.raise_for_status()
+            result = response.json()
+            text = result["choices"][0]["message"]["content"].strip()
+
         return text if text else _template_summary(vision_result, cost_result, policy_result, decision_result)
     except Exception as exc:  # noqa: BLE001
         logger.error("explanation_agent failed, falling back to template: %s", exc)
