@@ -21,7 +21,7 @@ load_dotenv()  # loads backend/.env automatically
 
 from fastapi import FastAPI, Request, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from pydantic import BaseModel
 
 import orchestrator
@@ -85,6 +85,13 @@ class ClaimResponse(BaseModel):
     policy_result: dict
     decision_result: dict
     summary_text: str
+
+
+
+
+@app.get("/")
+async def root_redirect():
+    return RedirectResponse(url="/docs")
 
 
 @app.get("/api/health")
