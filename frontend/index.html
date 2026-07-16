@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClaimSnap — AI-Powered Vehicle Damage Assessor</title>
+  <meta name="description" content="Submit vehicle damage claims instantly with ClaimSnap's AI-powered multi-agent assessment system. Fast, accurate, and fraud-resistant." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ===================== ANIMATED BACKGROUND ===================== -->
+  <div class="bg-orbs" aria-hidden="true">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <!-- ===================== LOGIN SCREEN ===================== -->
+  <section id="login-screen" class="screen screen-centered">
+    <div class="glass-card login-card">
+
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3L14.5 4Z"/>
+            <circle cx="12" cy="13" r="3"/>
+          </svg>
+        </div>
+        <span class="brand-name">ClaimSnap</span>
+        <span class="brand-badge">AI</span>
+      </div>
+
+      <div class="login-hero">
+        <h1 class="login-title">File Your Claim Instantly</h1>
+        <p class="login-subtitle">Multi-agent AI assesses damage, validates your policy, and detects fraud in seconds.</p>
+      </div>
+
+      <form id="login-form" class="form-stack" novalidate>
+        <div class="form-group">
+          <label class="form-label" for="input-user-name">Full Name</label>
+          <div class="input-wrap">
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <input required id="input-user-name" type="text" placeholder="e.g. Jordan Lee" class="form-input" autocomplete="name" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="input-vehicle-reg">Vehicle Registration</label>
+          <div class="input-wrap">
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 3v4h-7V8Z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            <input required id="input-vehicle-reg" type="text" placeholder="e.g. ABC-1234" class="form-input" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="input-insurance-type">Insurance Type</label>
+            <div class="input-wrap">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>
+              <select id="input-insurance-type" class="form-input form-select">
+                <option value="Comprehensive">Comprehensive</option>
+                <option value="Basic Liability">Basic Liability</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="input-policy-id">Policy ID</label>
+            <div class="input-wrap">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <input required id="input-policy-id" type="text" placeholder="POLICY-DEMO-001" class="form-input" />
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" id="btn-login" class="btn btn-primary btn-full">
+          <span>Continue to Dashboard</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </form>
+
+      <div class="login-features">
+        <div class="feature-pill"><span class="feature-dot green"></span> Vision AI</div>
+        <div class="feature-pill"><span class="feature-dot blue"></span> Fraud Detection</div>
+        <div class="feature-pill"><span class="feature-dot purple"></span> Policy Match</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== DASHBOARD ===================== -->
+  <section id="dashboard-screen" class="screen hidden">
+
+    <nav class="navbar">
+      <div class="navbar-inner">
+        <div class="brand">
+          <div class="brand-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3L14.5 4Z"/>
+              <circle cx="12" cy="13" r="3"/>
+            </svg>
+          </div>
+          <span class="brand-name">ClaimSnap</span>
+        </div>
+        <div class="user-chip">
+          <div class="user-avatar" id="display-avatar">J</div>
+          <div class="user-info">
+            <span id="display-user-name" class="user-name"></span>
+            <span id="display-vehicle-reg" class="user-reg"></span>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <main class="dashboard-main">
+
+      <!-- Upload Card -->
+      <div id="upload-card" class="glass-card upload-card">
+        <div class="card-header">
+          <div class="card-icon card-icon-blue">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3L14.5 4Z"/><circle cx="12" cy="13" r="3"/></svg>
+          </div>
+          <div>
+            <h2 class="card-title">Submit New Claim</h2>
+            <p class="card-subtitle">Capture live vehicle damage for AI assessment</p>
+          </div>
+        </div>
+
+        <input id="camera-input" type="file" accept="image/*" capture="environment" class="hidden" />
+
+        <div id="capture-zone" class="capture-zone" role="button" tabindex="0" aria-label="Open camera to capture damage photo">
+          <div class="capture-zone-glow"></div>
+          <div class="capture-icon-wrap">
+            <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3L14.5 4Z"/>
+              <circle cx="12" cy="13" r="3"/>
+            </svg>
+          </div>
+          <p class="capture-label">Tap to open camera</p>
+          <p class="capture-sublabel">Live capture only &middot; No gallery access</p>
+        </div>
+
+        <canvas id="preprocess-canvas" class="hidden"></canvas>
+
+        <div id="preview-wrap" class="hidden">
+          <div class="preview-header">
+            <span class="preview-badge">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Image ready
+            </span>
+          </div>
+          <img id="preview-image" class="preview-img" alt="Captured damage photo" />
+          <div class="btn-stack">
+            <button id="btn-submit-claim" class="btn btn-primary btn-full">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5Z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+              Submit for AI Assessment
+            </button>
+            <button id="btn-retake" class="btn btn-ghost btn-full">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>
+              Retake Photo
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Processing Card -->
+      <div id="processing-card" class="glass-card hidden">
+        <div class="processing-state">
+          <div class="processing-ring">
+            <div class="ring-inner"></div>
+          </div>
+          <h3 class="processing-title">Analysing Your Claim</h3>
+          <p class="processing-subtitle">Multi-agent AI pipeline running&hellip;</p>
+          <div class="pipeline-steps">
+            <div class="pipeline-step active" id="step-vision"><div class="step-dot"></div><span>Vision Analysis</span></div>
+            <div class="pipeline-step" id="step-fraud"><div class="step-dot"></div><span>Fraud Detection</span></div>
+            <div class="pipeline-step" id="step-cost"><div class="step-dot"></div><span>Cost Estimation</span></div>
+            <div class="pipeline-step" id="step-policy"><div class="step-dot"></div><span>Policy Validation</span></div>
+            <div class="pipeline-step" id="step-decision"><div class="step-dot"></div><span>Decision</span></div>
+            <div class="pipeline-step" id="step-summary"><div class="step-dot"></div><span>Summary</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Error Card -->
+      <div id="error-card" class="glass-card error-card hidden">
+        <div class="error-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <div>
+          <p class="error-title">Submission Failed</p>
+          <p id="error-message" class="error-message"></p>
+        </div>
+      </div>
+
+      <!-- Result Card -->
+      <div id="result-card" class="glass-card hidden result-card">
+        <div class="result-header">
+          <div>
+            <h2 class="card-title">Claim Assessment</h2>
+            <p id="claim-id-line" class="claim-id"></p>
+          </div>
+          <span id="status-badge" class="status-badge"></span>
+        </div>
+
+        <div class="summary-box">
+          <p id="summary-text" class="summary-text"></p>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <p class="stat-label">Repair Subtotal</p>
+            <p id="stat-subtotal" class="stat-value stat-value-green"></p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">Estimated Payout</p>
+            <p id="stat-payout" class="stat-value stat-value-blue"></p>
+          </div>
+        </div>
+
+        <div class="section-label">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Detected Damage
+        </div>
+        <div id="damage-list" class="damage-list"></div>
+
+        <div class="section-label">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>
+          Fraud Signals
+        </div>
+        <div id="fraud-summary" class="fraud-box"></div>
+
+        <button id="btn-new-claim" class="btn btn-ghost btn-full mt-4">Submit Another Claim</button>
+      </div>
+
+    </main>
+  </section>
+
+  <script src="app.js"></script>
+</body>
+</html>

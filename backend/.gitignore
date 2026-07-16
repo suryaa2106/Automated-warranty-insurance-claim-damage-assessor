@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+venv/
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Environment variables — NEVER commit these
+.env
+*.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
