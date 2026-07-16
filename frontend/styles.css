@@ -606,6 +606,92 @@ html, body {
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
 
+/* ---------- Portal Toggle (Customer / Insurer) ---------- */
+.portal-toggle {
+  display: flex;
+  gap: 6px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 4px;
+  margin: 16px 0;
+}
+.portal-tab {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.portal-tab:hover { color: var(--text); }
+.portal-tab-active {
+  background: linear-gradient(135deg, var(--blue), var(--purple));
+  color: #fff;
+  box-shadow: 0 2px 12px rgba(99,102,241,0.35);
+}
+
+/* ---------- Tier Badge ---------- */
+.tier-badge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.tier-low  { background: rgba(16,185,129,0.15);  color: var(--green);  border: 1px solid rgba(16,185,129,0.3);  }
+.tier-mid  { background: rgba(245,158,11,0.15);  color: var(--amber);  border: 1px solid rgba(245,158,11,0.3);  }
+.tier-high { background: rgba(239,68,68,0.15);   color: var(--red);    border: 1px solid rgba(239,68,68,0.3);   }
+
+/* ---------- Inline Form Alerts ---------- */
+.alert-error {
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: rgba(239,68,68,0.10);
+  border: 1px solid rgba(239,68,68,0.25);
+  color: var(--red);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.alert-success {
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: rgba(16,185,129,0.10);
+  border: 1px solid rgba(16,185,129,0.25);
+  color: var(--green);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* ---------- Login Hint ---------- */
+.login-hint {
+  margin-top: 12px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.login-hint code {
+  background: rgba(255,255,255,0.08);
+  border-radius: 5px;
+  padding: 1px 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* Wider login card for insurer form */
+.login-card { max-width: 520px; }
+
 /* ---------- Responsive ---------- */
 @media (max-width: 480px) {
   .form-row { grid-template-columns: 1fr; }

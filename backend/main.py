@@ -25,6 +25,8 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from pydantic import BaseModel
 
 import orchestrator
+import vehicle_db
+import classifier_agent
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("main")
@@ -87,6 +89,22 @@ class ClaimResponse(BaseModel):
     summary_text: str
 
 
+class LoginRequest(BaseModel):
+    vehicle_reg_number: str
+    customer_number: str
+
+
+class RegisterVehicleRequest(BaseModel):
+    vehicle_reg_number: str
+    customer_number: str
+    customer_name: str
+    make: str
+    model: str
+    year: int
+    policy_id: str
+    insurance_type: str
+
+
 
 
 @app.get("/")
@@ -135,6 +153,75 @@ async def get_claim(claim_id: str):
     if not record:
         raise HTTPException(status_code=404, detail="Claim not found.")
     return record
+
+
+# ── AUTH: Customer Login ──
+@app.post("/api/auth/login")
+async def customer_login(req: LoginRequest):
+    vehicle = vehicle_db.authenticate_customer(req.vehicle_reg_number, req.customer_number)
+    if not vehicle:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid vehicle registration number or customer number. Please contact your insurer."
+        )
+    return {
+        "success": True,
+        "vehicle_reg_number": vehicle["vehicle_reg_number"],
+        "customer_name": vehicle.get("customer_name", ""),
+        "make": vehicle.get("make", ""),
+        "model": vehicle.get("model", ""),
+        "year": vehicle.get("year", 0),
+        "price_tier": vehicle.get("price_tier", "Low"),
+        "policy_id": vehicle.get("policy_id", ""),
+        "insurance_type": vehicle.get("insurance_type", ""),
+    }
+
+
+# ── INSURER: Register a new vehicle + customer ──
+@app.post("/api/insurer/register")
+async def insurer_register(req: RegisterVehicleRequest):
+    # AI-classify the vehicle tier
+    try:
+        classification = await classifier_agent.classify_vehicle(req.make, req.model, req.year)
+        price_tier = classification.get("tier", "Mid")
+        tier_reason = classification.get("reason", "")
+    except Exception as exc:
+        logger.warning("Classifier failed, defaulting to Mid: %s", exc)
+        price_tier = "Mid"
+        tier_reason = "Classification unavailable"
+
+    data = {
+        "vehicle_reg_number": req.vehicle_reg_number.strip().upper(),
+        "customer_number": req.customer_number.strip().upper(),
+        "customer_name": req.customer_name,
+        "make": req.make,
+        "model": req.model,
+        "year": req.year,
+        "price_tier": price_tier,
+        "policy_id": req.policy_id,
+        "insurance_type": req.insurance_type,
+    }
+
+    vehicle_db.register_vehicle(data)
+
+    return {
+        "success": True,
+        "vehicle_reg_number": data["vehicle_reg_number"],
+        "customer_name": data["customer_name"],
+        "make": req.make,
+        "model": req.model,
+        "year": req.year,
+        "price_tier": price_tier,
+        "tier_reason": tier_reason,
+        "policy_id": req.policy_id,
+    }
+
+
+# ── INSURER: List all vehicles (for admin view) ──
+@app.get("/api/insurer/vehicles")
+async def list_vehicles():
+    from vehicle_db import _VEHICLES
+    return {"vehicles": list(_VEHICLES.values()), "count": len(_VEHICLES)}
 
 
 if __name__ == "__main__":

@@ -34,60 +34,148 @@
         <span class="brand-badge">AI</span>
       </div>
 
-      <div class="login-hero">
-        <h1 class="login-title">File Your Claim Instantly</h1>
-        <p class="login-subtitle">Multi-agent AI assesses damage, validates your policy, and detects fraud in seconds.</p>
+      <!-- Tab Toggle -->
+      <div class="portal-toggle">
+        <button id="tab-customer" class="portal-tab portal-tab-active" onclick="switchTab('customer')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Customer
+        </button>
+        <button id="tab-insurer" class="portal-tab" onclick="switchTab('insurer')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>
+          Insurer Portal
+        </button>
       </div>
 
-      <form id="login-form" class="form-stack" novalidate>
-        <div class="form-group">
-          <label class="form-label" for="input-user-name">Full Name</label>
-          <div class="input-wrap">
-            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            <input required id="input-user-name" type="text" placeholder="e.g. Jordan Lee" class="form-input" autocomplete="name" />
-          </div>
+      <!-- ── CUSTOMER LOGIN ── -->
+      <div id="customer-panel">
+        <div class="login-hero">
+          <h1 class="login-title">File Your Claim Instantly</h1>
+          <p class="login-subtitle">Enter your vehicle registration and customer number to continue.</p>
         </div>
 
-        <div class="form-group">
-          <label class="form-label" for="input-vehicle-reg">Vehicle Registration</label>
-          <div class="input-wrap">
-            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 3v4h-7V8Z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-            <input required id="input-vehicle-reg" type="text" placeholder="e.g. ABC-1234" class="form-input" />
-          </div>
-        </div>
-
-        <div class="form-row">
+        <form id="login-form" class="form-stack" novalidate>
           <div class="form-group">
-            <label class="form-label" for="input-insurance-type">Insurance Type</label>
+            <label class="form-label" for="input-vehicle-reg">Vehicle Registration No.</label>
             <div class="input-wrap">
-              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>
-              <select id="input-insurance-type" class="form-input form-select">
-                <option value="Comprehensive">Comprehensive</option>
-                <option value="Basic Liability">Basic Liability</option>
-              </select>
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 3v4h-7V8Z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+              <input required id="input-vehicle-reg" type="text" placeholder="e.g. ABC-1234" class="form-input" autocomplete="off" />
             </div>
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="input-policy-id">Policy ID</label>
+            <label class="form-label" for="input-customer-number">Customer Number</label>
             <div class="input-wrap">
               <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-              <input required id="input-policy-id" type="text" placeholder="POLICY-DEMO-001" class="form-input" />
+              <input required id="input-customer-number" type="text" placeholder="e.g. CUST-001" class="form-input" autocomplete="off" />
             </div>
           </div>
+
+          <div id="login-error" class="alert-error hidden"></div>
+
+          <button type="submit" id="btn-login" class="btn btn-primary btn-full">
+            <span id="btn-login-text">Continue to Dashboard</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </form>
+
+        <div class="login-hint">
+          <p>Demo credentials: <code>ABC-1234</code> / <code>CUST-001</code></p>
         </div>
 
-        <button type="submit" id="btn-login" class="btn btn-primary btn-full">
-          <span>Continue to Dashboard</span>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </button>
-      </form>
-
-      <div class="login-features">
-        <div class="feature-pill"><span class="feature-dot green"></span> Vision AI</div>
-        <div class="feature-pill"><span class="feature-dot blue"></span> Fraud Detection</div>
-        <div class="feature-pill"><span class="feature-dot purple"></span> Policy Match</div>
+        <div class="login-features">
+          <div class="feature-pill"><span class="feature-dot green"></span> Vision AI</div>
+          <div class="feature-pill"><span class="feature-dot blue"></span> Fraud Detection</div>
+          <div class="feature-pill"><span class="feature-dot purple"></span> Tier Pricing</div>
+        </div>
       </div>
+
+      <!-- ── INSURER PORTAL ── -->
+      <div id="insurer-panel" class="hidden">
+        <div class="login-hero">
+          <h1 class="login-title">Insurer Portal</h1>
+          <p class="login-subtitle">Register a new customer vehicle. AI will auto-classify the price tier.</p>
+        </div>
+
+        <form id="insurer-form" class="form-stack" novalidate>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="ins-customer-name">Customer Name</label>
+              <div class="input-wrap">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <input required id="ins-customer-name" type="text" placeholder="Full Name" class="form-input" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="ins-customer-number">Customer Number</label>
+              <div class="input-wrap">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <input required id="ins-customer-number" type="text" placeholder="e.g. CUST-100" class="form-input" />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="ins-vehicle-reg">Vehicle Registration No.</label>
+            <div class="input-wrap">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 3v4h-7V8Z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+              <input required id="ins-vehicle-reg" type="text" placeholder="e.g. KA-05-MJ-7890" class="form-input" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="ins-make">Make</label>
+              <div class="input-wrap">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85m19.5 1.9c-3.5-.93-6.63-.82-8.94 0-2.58.92-5.01 2.86-7.44 6.32"/></svg>
+                <input required id="ins-make" type="text" placeholder="e.g. Toyota" class="form-input" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="ins-model">Model</label>
+              <div class="input-wrap">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3L14.5 4Z"/><circle cx="12" cy="13" r="3"/></svg>
+                <input required id="ins-model" type="text" placeholder="e.g. Camry" class="form-input" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="ins-year">Year</label>
+              <div class="input-wrap">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <input required id="ins-year" type="number" placeholder="2023" min="1990" max="2030" class="form-input" />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="ins-policy-id">Policy ID</label>
+              <div class="input-wrap">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>
+                <input required id="ins-policy-id" type="text" placeholder="POLICY-DEMO-001" class="form-input" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="ins-insurance-type">Insurance Type</label>
+              <div class="input-wrap">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>
+                <select id="ins-insurance-type" class="form-input form-select">
+                  <option value="Comprehensive">Comprehensive</option>
+                  <option value="Basic Liability">Basic Liability</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div id="insurer-error" class="alert-error hidden"></div>
+          <div id="insurer-success" class="alert-success hidden"></div>
+
+          <button type="submit" id="btn-insurer-register" class="btn btn-primary btn-full">
+            <span id="btn-insurer-text">Register & Classify Vehicle</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5Z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          </button>
+        </form>
+      </div>
+
     </div>
   </section>
 
@@ -111,6 +199,7 @@
             <span id="display-user-name" class="user-name"></span>
             <span id="display-vehicle-reg" class="user-reg"></span>
           </div>
+          <span id="display-tier-badge" class="tier-badge hidden"></span>
         </div>
       </div>
     </nav>

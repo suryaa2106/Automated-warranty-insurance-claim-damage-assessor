@@ -23,6 +23,7 @@ import cost_agent
 import policy_agent
 import decision_agent
 import explanation_agent
+import vehicle_db
 
 logger = logging.getLogger("orchestrator")
 
@@ -77,8 +78,12 @@ async def process_claim(
     # 2. Fraud — is this photo trustworthy?
     fraud_result = await fraud_agent.assess_fraud(image_bytes)
 
-    # 3. Cost — what will it cost to repair?
-    cost_result = cost_agent.estimate_cost(vision_result.get("damaged_parts", []))
+    # 2b. Fetch vehicle price tier for cost scaling
+    vehicle_record = vehicle_db.get_vehicle(vehicle_reg_number)
+    price_tier = vehicle_record.get("price_tier", "Low") if vehicle_record else "Low"
+
+    # 3. Cost — what will it cost to repair? (scaled by vehicle price tier)
+    cost_result = cost_agent.estimate_cost(vision_result.get("damaged_parts", []), price_tier=price_tier)
 
     # 4. Policy — what does the customer's policy actually cover?
     policy_result = policy_agent.validate_policy(policy_id, cost_result["line_items"], cost_result["subtotal"])

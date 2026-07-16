@@ -1,8 +1,8 @@
 // app.js
 // ---------------------------------------------------------------
-// Handles: login/auth state, forced-camera capture, HTML5 Canvas
-// pre-processing (auto-orient + sharpen/contrast), claim submission,
-// pipeline step animation, and result rendering.
+// Handles: Customer/Insurer tab toggle, DB-validated customer login,
+// insurer vehicle registration, forced-camera capture, HTML5 Canvas
+// pre-processing, claim submission, pipeline step animation, result rendering.
 // ---------------------------------------------------------------
 
 const API_BASE_URL = window.CLAIM_API_BASE_URL || "http://localhost:8000";
@@ -11,10 +11,12 @@ const API_BASE_URL = window.CLAIM_API_BASE_URL || "http://localhost:8000";
 const loginScreen      = document.getElementById("login-screen");
 const dashboardScreen  = document.getElementById("dashboard-screen");
 const loginForm        = document.getElementById("login-form");
+const insurerForm      = document.getElementById("insurer-form");
 
 const displayUserName  = document.getElementById("display-user-name");
 const displayVehicleReg= document.getElementById("display-vehicle-reg");
 const displayAvatar    = document.getElementById("display-avatar");
+const displayTierBadge = document.getElementById("display-tier-badge");
 
 const captureZone      = document.getElementById("capture-zone");
 const cameraInput      = document.getElementById("camera-input");
@@ -31,31 +33,149 @@ const errorMessage     = document.getElementById("error-message");
 const resultCard       = document.getElementById("result-card");
 const btnNewClaim      = document.getElementById("btn-new-claim");
 
-// Pipeline steps (in order)
 const PIPELINE_STEPS = ["step-vision","step-fraud","step-cost","step-policy","step-decision","step-summary"];
 
 // ----- App state -----
-let session = null;           // { userName, vehicleReg, insuranceType, policyId }
-let processedImageBlob = null;// Blob produced after canvas pre-processing
-let pipelineTimer = null;     // interval for step animation
+let session = null;           // full session object from API
+let processedImageBlob = null;
+let pipelineTimer = null;
 
-// ===================== LOGIN =====================
-loginForm.addEventListener("submit", (event) => {
+// ===================== TAB TOGGLE =====================
+function switchTab(tab) {
+  const customerPanel = document.getElementById("customer-panel");
+  const insurerPanel  = document.getElementById("insurer-panel");
+  const tabCustomer   = document.getElementById("tab-customer");
+  const tabInsurer    = document.getElementById("tab-insurer");
+
+  if (tab === "customer") {
+    customerPanel.classList.remove("hidden");
+    insurerPanel.classList.add("hidden");
+    tabCustomer.classList.add("portal-tab-active");
+    tabInsurer.classList.remove("portal-tab-active");
+  } else {
+    insurerPanel.classList.remove("hidden");
+    customerPanel.classList.add("hidden");
+    tabInsurer.classList.add("portal-tab-active");
+    tabCustomer.classList.remove("portal-tab-active");
+  }
+}
+
+// ===================== CUSTOMER LOGIN =====================
+loginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
-  session = {
-    userName:      document.getElementById("input-user-name").value.trim(),
-    vehicleReg:    document.getElementById("input-vehicle-reg").value.trim(),
-    insuranceType: document.getElementById("input-insurance-type").value,
-    policyId:      document.getElementById("input-policy-id").value.trim(),
+  const vehicleReg     = document.getElementById("input-vehicle-reg").value.trim();
+  const customerNumber = document.getElementById("input-customer-number").value.trim();
+  const loginError     = document.getElementById("login-error");
+  const btnLoginText   = document.getElementById("btn-login-text");
+
+  if (!vehicleReg || !customerNumber) {
+    showFormError(loginError, "Please fill in both fields.");
+    return;
+  }
+
+  btnLoginText.textContent = "Verifying...";
+  document.getElementById("btn-login").disabled = true;
+  loginError.classList.add("hidden");
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ vehicle_reg_number: vehicleReg, customer_number: customerNumber }),
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.detail || "Authentication failed.");
+    }
+
+    const data = await response.json();
+    session = {
+      customerName:  data.customer_name || vehicleReg,
+      vehicleReg:    data.vehicle_reg_number,
+      insuranceType: data.insurance_type,
+      policyId:      data.policy_id,
+      make:          data.make,
+      model:         data.model,
+      year:          data.year,
+      priceTier:     data.price_tier,
+    };
+
+    populateDashboard();
+    loginScreen.classList.add("hidden");
+    dashboardScreen.classList.remove("hidden");
+
+  } catch (err) {
+    showFormError(loginError, err.message || "Login failed. Please try again.");
+  } finally {
+    btnLoginText.textContent = "Continue to Dashboard";
+    document.getElementById("btn-login").disabled = false;
+  }
+});
+
+function populateDashboard() {
+  displayUserName.textContent   = session.customerName;
+  displayVehicleReg.textContent = `${session.make} ${session.model} ${session.year} · ${session.vehicleReg}`;
+  displayAvatar.textContent     = session.customerName.charAt(0).toUpperCase();
+
+  // Tier badge
+  const tierColors = { Low: "tier-low", Mid: "tier-mid", High: "tier-high" };
+  displayTierBadge.textContent  = `${session.priceTier} Tier`;
+  displayTierBadge.className    = `tier-badge ${tierColors[session.priceTier] || "tier-mid"}`;
+}
+
+// ===================== INSURER REGISTRATION =====================
+insurerForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const insurerError   = document.getElementById("insurer-error");
+  const insurerSuccess = document.getElementById("insurer-success");
+  const btnText        = document.getElementById("btn-insurer-text");
+
+  insurerError.classList.add("hidden");
+  insurerSuccess.classList.add("hidden");
+  btnText.textContent = "Classifying vehicle...";
+  document.getElementById("btn-insurer-register").disabled = true;
+
+  const payload = {
+    customer_name:       document.getElementById("ins-customer-name").value.trim(),
+    customer_number:     document.getElementById("ins-customer-number").value.trim().toUpperCase(),
+    vehicle_reg_number:  document.getElementById("ins-vehicle-reg").value.trim(),
+    make:                document.getElementById("ins-make").value.trim(),
+    model:               document.getElementById("ins-model").value.trim(),
+    year:                parseInt(document.getElementById("ins-year").value, 10),
+    policy_id:           document.getElementById("ins-policy-id").value.trim(),
+    insurance_type:      document.getElementById("ins-insurance-type").value,
   };
 
-  displayUserName.textContent   = session.userName;
-  displayVehicleReg.textContent = session.vehicleReg;
-  displayAvatar.textContent     = session.userName.charAt(0).toUpperCase();
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/insurer/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
 
-  loginScreen.classList.add("hidden");
-  dashboardScreen.classList.remove("hidden");
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.detail || "Registration failed.");
+    }
+
+    const data = await response.json();
+    const tierEmoji = { Low: "🟢", Mid: "🟡", High: "🔴" }[data.price_tier] || "⚪";
+
+    showFormSuccess(
+      insurerSuccess,
+      `✓ ${data.customer_name} registered! ${data.make} ${data.model} ${data.year} classified as ${tierEmoji} ${data.price_tier} Tier. Reg: ${data.vehicle_reg_number}`
+    );
+
+    insurerForm.reset();
+  } catch (err) {
+    showFormError(insurerError, err.message);
+  } finally {
+    btnText.textContent = "Register & Classify Vehicle";
+    document.getElementById("btn-insurer-register").disabled = false;
+  }
 });
 
 // ===================== CAMERA CAPTURE =====================
@@ -85,10 +205,6 @@ btnRetake.addEventListener("click", () => {
   captureZone.classList.remove("hidden");
 });
 
-/**
- * Draws the captured image onto a canvas, auto-orients it, and applies
- * a light contrast/saturation boost before re-exporting as JPEG.
- */
 async function preprocessImage(file) {
   const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
   const canvas = preprocessCanvas;
@@ -113,7 +229,6 @@ async function preprocessImage(file) {
 // ===================== PIPELINE STEP ANIMATION =====================
 function startPipelineAnimation() {
   let current = 0;
-  // Reset all steps
   PIPELINE_STEPS.forEach((id) => {
     const el = document.getElementById(id);
     el.classList.remove("active", "done");
@@ -135,11 +250,7 @@ function startPipelineAnimation() {
 }
 
 function stopPipelineAnimation() {
-  if (pipelineTimer) {
-    clearInterval(pipelineTimer);
-    pipelineTimer = null;
-  }
-  // Mark all done
+  if (pipelineTimer) { clearInterval(pipelineTimer); pipelineTimer = null; }
   PIPELINE_STEPS.forEach((id) => {
     const el = document.getElementById(id);
     el.classList.remove("active");
@@ -158,11 +269,11 @@ btnSubmitClaim.addEventListener("click", async () => {
   startPipelineAnimation();
 
   const formData = new FormData();
-  formData.append("user_name",         session.userName);
-  formData.append("vehicle_reg_number",session.vehicleReg);
-  formData.append("insurance_type",    session.insuranceType);
-  formData.append("policy_id",         session.policyId);
-  formData.append("image",             processedImageBlob, "claim_photo.jpg");
+  formData.append("user_name",          session.customerName);
+  formData.append("vehicle_reg_number", session.vehicleReg);
+  formData.append("insurance_type",     session.insuranceType);
+  formData.append("policy_id",          session.policyId);
+  formData.append("image",              processedImageBlob, "claim_photo.jpg");
 
   try {
     const response = await fetch(`${API_BASE_URL}/api/claims`, {
@@ -177,7 +288,7 @@ btnSubmitClaim.addEventListener("click", async () => {
 
     const result = await response.json();
     stopPipelineAnimation();
-    await sleep(400); // brief pause so user sees final step
+    await sleep(400);
     renderResult(result);
   } catch (err) {
     console.error("Claim submission failed:", err);
@@ -196,9 +307,9 @@ function renderResult(result) {
   // Status badge
   const statusBadge = document.getElementById("status-badge");
   const statusMap = {
-    APPROVED:                  { label: "Approved",       cls: "status-approved" },
-    REJECTED:                  { label: "Rejected",       cls: "status-rejected" },
-    FLAGGED_FOR_MANUAL_REVIEW: { label: "Manual Review",  cls: "status-flagged"  },
+    APPROVED:                  { label: "Approved",      cls: "status-approved" },
+    REJECTED:                  { label: "Rejected",      cls: "status-rejected" },
+    FLAGGED_FOR_MANUAL_REVIEW: { label: "Manual Review", cls: "status-flagged"  },
   };
   const statusInfo = statusMap[result.decision_result.status] || { label: result.decision_result.status, cls: "status-default" };
   statusBadge.textContent = statusInfo.label;
@@ -211,8 +322,11 @@ function renderResult(result) {
   // Summary
   document.getElementById("summary-text").textContent = result.summary_text;
 
-  // Stats
-  document.getElementById("stat-subtotal").textContent = `$${result.cost_result.subtotal}`;
+  // Stats — show tier info too
+  const tier = result.cost_result?.price_tier || session?.priceTier || "";
+  const multiplier = result.cost_result?.tier_multiplier || 1;
+  const tierLabel = tier ? ` (${tier} Tier ×${multiplier})` : "";
+  document.getElementById("stat-subtotal").textContent = `$${result.cost_result.subtotal}${tierLabel}`;
   document.getElementById("stat-payout").textContent   = `$${result.policy_result.final_payout_estimate}`;
 
   // Damage list
@@ -233,8 +347,8 @@ function renderResult(result) {
   });
 
   // Fraud summary
-  const fraudEl  = document.getElementById("fraud-summary");
-  const fraud     = result.fraud_result;
+  const fraudEl = document.getElementById("fraud-summary");
+  const fraud   = result.fraud_result;
   fraudEl.textContent = fraud.fraud_flag
     ? `⚠ Fraud flag raised: ${fraud.exif_check?.reason || ""} ${fraud.duplicate_check?.is_duplicate ? "Duplicate image detected." : ""}`.trim()
     : "✓ No fraud signals detected. EXIF metadata and duplicate-image checks passed.";
@@ -256,4 +370,15 @@ function showError(message) {
   errorMessage.textContent = message;
   errorCard.classList.remove("hidden");
 }
+
+function showFormError(el, message) {
+  el.textContent = message;
+  el.classList.remove("hidden");
+}
+
+function showFormSuccess(el, message) {
+  el.textContent = message;
+  el.classList.remove("hidden");
+}
+
 function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
